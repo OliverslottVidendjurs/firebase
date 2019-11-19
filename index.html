@@ -1,0 +1,56 @@
+<!-- EJ FÆRDIG - bare hentet herfra: C:\Marianne\asp.net\_WEBAPI\API-september2018\SimpelCRUDNoter\Views\Home -->
+<!-- Der var to versioner: 1 med scriptet embeded i html - og en som linkede til script ... dette script er lagt i js-mappen - sammenlign med script herunder - hvad er bedst? -->
+<!-- Opret note med input. Ret direkte i note - p-tag (contenteditable) - og slet ved at klikke på note -->
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Notater med CRUD</title>
+    <link rel="stylesheet" href="./assets/css/notater.css">
+    <script src="./assets/js/notater.js" defer></script>
+</head>
+
+<body>
+    <div class="notesblok">
+
+        <h1>Alle mine noter</h1>
+
+        <div class="notecontainer">
+
+            <input type="text" placeholder="Opret en note" id="inpNotattekst" />
+
+            <div id="notes">
+
+                <div class="note">
+                    <p></p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    <div id="overlay">
+        <form id="popup">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password">
+            <button type="submit" id="loginBtn">Login</button>
+            <button type="button" id="opretBruger">Opret bruger</button>
+        </form>
+        <form id="opretform">
+            <label for="opretEmail">Email</label>
+            <input name="opretEmail" id="opretEmail" type="email">
+            <label for="">Password</label>
+            <input id="opretPassword" name="opretPassword" type="password">
+            <label for="">Gentag Password</label>
+            <input id="gentagOpretPassword" name="gentagOpretPassword" type="password">
+            <button id="opretSubmit" type="submit">Opret</button>
+        </form>
+    </div>
+</body>
+
+</html>

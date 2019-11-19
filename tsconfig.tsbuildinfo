@@ -1,0 +1,17 @@
+{
+  "program": {
+    "fileInfos": {},
+    "options": {
+      "target": 1,
+      "module": 1,
+      "strict": true,
+      "esModuleInterop": true,
+      "incremental": true,
+      "configFilePath": "./tsconfig.json"
+    },
+    "referencedMap": {},
+    "exportedModulesMap": {},
+    "semanticDiagnosticsPerFile": []
+  },
+  "version": "3.6.3"
+}
