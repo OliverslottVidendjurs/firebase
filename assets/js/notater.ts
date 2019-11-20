@@ -9,38 +9,49 @@ const opretform = document.querySelector<HTMLFormElement>("#opretform");
 const opretEmail = document.querySelector<HTMLInputElement>("#opretEmail");
 const opretPassword = document.querySelector<HTMLInputElement>("#opretPassword");
 const gentagOpretPassword = document.querySelector<HTMLInputElement>("#gentagOpretPassword");
+const tilbage = document.querySelector<HTMLButtonElement>("#tilbage");
 
 inp!.addEventListener("keyup", opretNotat);
 
 let token: string | null = null;
+let localId: string | null = null;
 
 const wsurl = "https://notatlist.firebaseio.com";
 
-opretBtn!.addEventListener("click", function(){
+tilbage!.addEventListener("click", function(){
+    form!.style.display = "block";
+    opretform!.style.display = "none";
+});
+
+opretBtn!.addEventListener("click", function () {
     form!.style.display = "none";
     opretform!.style.display = "block";
 });
 
-opretform!.addEventListener("submit", function(e: Event){
+opretform!.addEventListener("submit", function (e: Event) {
     e.preventDefault();
-    if(opretPassword!.value !== gentagOpretPassword!.value){
+    if (opretPassword!.value !== gentagOpretPassword!.value) {
         alert("Passwords er ikke ens!");
+        return;
+    }
+    if(opretPassword!.value.length < 6){
+        alert("Password skal være større end 5 tegn!");
         return;
     }
     const opretData = {
         email: opretEmail!.value,
         password: opretPassword!.value
     }
-    //https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBcsQlAxLSUObImGESjmso6oRTF1lL52ZA
     fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBcsQlAxLSUObImGESjmso6oRTF1lL52ZA`, {
         method: "POST",
         body: JSON.stringify(opretData)
-    }).then(function(data){
+    }).then(function (data) {
         return data.json();
     }).then(function (json) {
         alert("Oprettet bruger!");
         token = json.idToken;
-        document.querySelector("#overlay")!.remove();kaldWebserviceAlle();
+        localId = json.localId;
+        document.querySelector("#overlay")!.remove(); kaldWebserviceAlle();
 
     }).catch(function (error) {
         console.error(error);
@@ -70,11 +81,10 @@ function opretNotat(e: Event): void {
 function kaldWebserviceOpret(inp: string): void {
     const nytnotat: notatData = {
         notat: inp,
-        date: new Date(),
-        email: token!
+        date: new Date()
     };
 
-    fetch(`${wsurl}/notater.json`, {
+    fetch(`${wsurl}/users/${localId}/notater.json?auth=${token}`, {
         method: "POST",
         body: JSON.stringify(nytnotat)
     }).then(function () {
@@ -84,9 +94,9 @@ function kaldWebserviceOpret(inp: string): void {
         console.error(error);
     });
 }
-kaldWebserviceAlle();
+// kaldWebserviceAlle();
 function kaldWebserviceAlle(): void {
-    fetch(`${wsurl}/notater.json`, {
+    fetch(`${wsurl}/users/${localId}/notater.json?auth=${token}`, {
         method: "GET"
     }).then(function (response) {
         return response.json();
@@ -97,14 +107,14 @@ function kaldWebserviceAlle(): void {
     });
 }
 
+
 interface notatType {
     [id: string]: notatData
 }
 
 interface notatData {
     notat: string,
-    date: Date,
-    email: string
+    date: Date
 }
 
 function udskrivNotater(noterJson: notatType): void {
@@ -113,7 +123,7 @@ function udskrivNotater(noterJson: notatType): void {
         return;
 
     for (let id of Object.keys(noterJson)) {
-        
+
         let notediv = document.createElement("div");
         notediv.className = "note";
 
@@ -150,7 +160,7 @@ function udskrivNotater(noterJson: notatType): void {
 }
 
 function kaldWebserviceSlet(id: string): void {
-    fetch(`${wsurl}/notater/${id}.json`, {
+    fetch(`${wsurl}/users/${localId}/notater/${id}.json?auth=${token}`, {
         method: "DELETE"
     }).then(function () {
         kaldWebserviceAlle();
@@ -166,11 +176,10 @@ function kaldWebserviceRet(p: HTMLParagraphElement): void {
 
     let rettetnotat: notatData = {
         notat: notattxt,
-        date: new Date(notatdate!),
-        email: token!
+        date: new Date(notatdate!)
     };
 
-    fetch(`${wsurl}/notater/${notatid}.json`, {
+    fetch(`${wsurl}/users/${localId}/notater/${notatid}.json/?auth=${token}`, {
         method: "PUT",
         body: JSON.stringify(rettetnotat)
     }).then(function () {
@@ -196,6 +205,7 @@ function login(email: string, password: string) {
             return response.json();
         }).then(function (json) {
             token = json.idToken;
+            localId = json.localId;
             resolve();
         }).catch(function () {
             reject();

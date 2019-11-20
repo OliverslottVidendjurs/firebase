@@ -10,9 +10,15 @@ const opretform = document.querySelector("#opretform");
 const opretEmail = document.querySelector("#opretEmail");
 const opretPassword = document.querySelector("#opretPassword");
 const gentagOpretPassword = document.querySelector("#gentagOpretPassword");
+const tilbage = document.querySelector("#tilbage");
 inp.addEventListener("keyup", opretNotat);
 let token = null;
+let localId = null;
 const wsurl = "https://notatlist.firebaseio.com";
+tilbage.addEventListener("click", function () {
+    form.style.display = "block";
+    opretform.style.display = "none";
+});
 opretBtn.addEventListener("click", function () {
     form.style.display = "none";
     opretform.style.display = "block";
@@ -23,11 +29,14 @@ opretform.addEventListener("submit", function (e) {
         alert("Passwords er ikke ens!");
         return;
     }
+    if (opretPassword.value.length < 6) {
+        alert("Password skal være større end 5 tegn!");
+        return;
+    }
     const opretData = {
         email: opretEmail.value,
         password: opretPassword.value
     };
-    //https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBcsQlAxLSUObImGESjmso6oRTF1lL52ZA
     fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBcsQlAxLSUObImGESjmso6oRTF1lL52ZA`, {
         method: "POST",
         body: JSON.stringify(opretData)
@@ -36,6 +45,7 @@ opretform.addEventListener("submit", function (e) {
     }).then(function (json) {
         alert("Oprettet bruger!");
         token = json.idToken;
+        localId = json.localId;
         document.querySelector("#overlay").remove();
         kaldWebserviceAlle();
     }).catch(function (error) {
@@ -61,10 +71,9 @@ function opretNotat(e) {
 function kaldWebserviceOpret(inp) {
     const nytnotat = {
         notat: inp,
-        date: new Date(),
-        email: token
+        date: new Date()
     };
-    fetch(`${wsurl}/notater.json`, {
+    fetch(`${wsurl}/users/${localId}/notater.json?auth=${token}`, {
         method: "POST",
         body: JSON.stringify(nytnotat)
     }).then(function () {
@@ -74,9 +83,9 @@ function kaldWebserviceOpret(inp) {
         console.error(error);
     });
 }
-kaldWebserviceAlle();
+// kaldWebserviceAlle();
 function kaldWebserviceAlle() {
-    fetch(`${wsurl}/notater.json`, {
+    fetch(`${wsurl}/users/${localId}/notater.json?auth=${token}`, {
         method: "GET"
     }).then(function (response) {
         return response.json();
@@ -120,7 +129,7 @@ function udskrivNotater(noterJson) {
     }
 }
 function kaldWebserviceSlet(id) {
-    fetch(`${wsurl}/notater/${id}.json`, {
+    fetch(`${wsurl}/users/${localId}/notater/${id}.json?auth=${token}`, {
         method: "DELETE"
     }).then(function () {
         kaldWebserviceAlle();
@@ -134,10 +143,9 @@ function kaldWebserviceRet(p) {
     let notattxt = p.innerHTML.replace("<br>", "");
     let rettetnotat = {
         notat: notattxt,
-        date: new Date(notatdate),
-        email: token
+        date: new Date(notatdate)
     };
-    fetch(`${wsurl}/notater/${notatid}.json`, {
+    fetch(`${wsurl}/users/${localId}/notater/${notatid}.json/?auth=${token}`, {
         method: "PUT",
         body: JSON.stringify(rettetnotat)
     }).then(function () {
@@ -162,6 +170,7 @@ function login(email, password) {
             return response.json();
         }).then(function (json) {
             token = json.idToken;
+            localId = json.localId;
             resolve();
         }).catch(function () {
             reject();
